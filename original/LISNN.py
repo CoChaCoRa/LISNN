@@ -40,9 +40,6 @@ class LISNN(nn.Module):
         elif self.dts == 'NMNIST':
             self.cnn = ((2, 64, 3, 1, 1, 5, 2), (64, 64, 3, 1, 1, 5, 2))
             self.kernel = (36, 18, 9)
-        elif self.dts == 'CIFAR10':
-            self.cnn = ((3, 32, 3, 1, 1, 5, 2), (32, 32, 3, 1, 1, 5, 2))
-            self.kernel = (32, 16, 8)
 
         self.conv1 = nn.Conv2d(self.cnn[0][0], self.cnn[0][1], kernel_size = self.cnn[0][2], stride = self.cnn[0][3], padding = self.cnn[0][4], bias = if_bias)
         self.conv2 = nn.Conv2d(self.cnn[1][0], self.cnn[1][1], kernel_size = self.cnn[1][2], stride = self.cnn[1][3], padding = self.cnn[1][4], bias = if_bias)
@@ -64,7 +61,7 @@ class LISNN(nn.Module):
         h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, self.fc[1]).cuda()
 
         for step in range(time_window):
-            if self.dts == 'MNIST' or self.dts == 'Fashion-MNIST' or self.dts == 'CIFAR10':
+            if self.dts == 'MNIST' or self.dts == 'Fashion-MNIST':
                 x = input > torch.rand(input.size()).cuda()
             elif self.dts == 'NMNIST':
                 x = input[:, :, :, :, step]

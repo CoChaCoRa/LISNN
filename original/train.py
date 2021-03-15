@@ -8,7 +8,7 @@ import os
 import time
 import argparse
 
-#from nmnist import nmnist
+from nmnist import nmnist
 from LISNN import LISNN
 
 parser = argparse.ArgumentParser(description='train.py')
@@ -20,8 +20,6 @@ parser.add_argument('-batch_size', type = int, default = 100)
 parser.add_argument('-learning_rate', type = float, default = 1e-3)
 parser.add_argument('-dts', type = str, default = 'MNIST')
 parser.add_argument('-if_lateral', type = bool, default = True)
-parser.add_argument('-loss', type = str, default = 'MSE')
-parser.add_argument('-weight_decay', type = float, default = 0)
 
 opt = parser.parse_args()
 
@@ -32,15 +30,9 @@ torch.backends.cudnn.deterministic = True
 
 test_scores = []
 train_scores = []
-#save_path = './' + opt.model + '_' + opt.dts + '_' + str(opt.seed)
-save_path = './' + 'LISNN' + '_' + opt.dts + '_' + str(opt.seed)
-file_name = "/result" + '_' + time.strftime("%Y%m%d%H%M%S", time.localtime()) +'.txt'
+save_path = './' + opt.model + '_' + opt.dts + '_' + str(opt.seed)
 if not os.path.exists(save_path):
     os.mkdir(save_path)
-    
-f = open(save_path + file_name ,'a')
-f.write('Loss_function: %s, Learning_rate: %f, Weight_decay: %f' % (opt.loss, opt.learning_rate, opt.weight_decay))
-f.write('\n')
 
 if opt.dts == 'MNIST':
     train_dataset = dsets.MNIST(root = './data/mnist/', train = True, transform = transforms.ToTensor(), download = True)
@@ -48,9 +40,6 @@ if opt.dts == 'MNIST':
 elif opt.dts == 'Fashion-MNIST':
     train_dataset = dsets.FashionMNIST(root = './data/fashion/', train = True, transform = transforms.ToTensor(), download = True)
     test_dataset = dsets.FashionMNIST(root = './data/fashion/', train = False, transform = transforms.ToTensor())
-elif opt.dts == 'CIFAR10':
-    train_dataset = dsets.CIFAR10(root='./data', train=True, download=False, transform=transforms.ToTensor())
-    test_dataset = dsets.CIFAR10(root='./data', train=False, download=False, transform=transforms.ToTensor())
 elif opt.dts == 'NMNIST':
     train_dataset = nmnist(datasetPath = 'nmnist/Train/', sampleFile = 'nmnist/Train.txt', samplingTime = 1.0, sampleLength = 20)
     test_dataset = nmnist(datasetPath = 'nmnist/Test/', sampleFile = 'nmnist/Test.txt', samplingTime = 1.0, sampleLength = 20)
@@ -60,12 +49,8 @@ test_loader = torch.utils.data.DataLoader(dataset = test_dataset, batch_size = o
 
 model = LISNN(opt)
 model.cuda()
-#loss_function = nn.MSELoss()
-if opt.loss == 'MSE':
-    loss_function = nn.MSELoss()
-elif opt.loss == 'CE':
-    loss_function = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr = opt.learning_rate, weight_decay = opt.weight_decay)
+loss_function = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = opt.learning_rate)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 50, gamma = 0.1)
 
 def train(epoch):
@@ -76,15 +61,10 @@ def train(epoch):
     for i, (images, labels) in enumerate(train_loader):
         optimizer.zero_grad()
         images = Variable(images.cuda())
-        
-        if opt.loss == 'MSE':
-            one_hot = torch.zeros(opt.batch_size, model.fc[-1]).scatter(1, labels.unsqueeze(1), 1)
-            labels = Variable(one_hot.cuda())
-        if opt.loss == 'CE':
-            labels=torch.tensor(labels, dtype=torch.long).cuda()
+        one_hot = torch.zeros(opt.batch_size, model.fc[-1]).scatter(1, labels.unsqueeze(1), 1)
+        labels = Variable(one_hot.cuda())
 
-        outputs = model(images) 
-        
+        outputs = model(images)
         loss = loss_function(outputs, labels)
         total_loss += float(loss)
         loss.backward()
@@ -92,9 +72,6 @@ def train(epoch):
 
         if (i + 1) % (len(train_dataset) // (opt.batch_size * 6)) == 0:
             print('Epoch: [%d/%d], Step: [%d/%d], Loss: %.4f, Time: %.2f' % (epoch + 1, opt.epoch, i + 1, len(train_dataset) // opt.batch_size, total_loss, time.time() - start_time))
-            f = open(save_path + file_name ,'a')
-            f.write('Epoch: [%d/%d], Step: [%d/%d], Loss: %.4f, Time: %.2f' % (epoch + 1, opt.epoch, i + 1, len(train_dataset) // opt.batch_size, total_loss, time.time() - start_time))
-            f.write('\n')
             start_time = time.time()
             total_loss = 0
 
@@ -114,9 +91,6 @@ def eval(epoch, if_test):
 
         acc = 100.0 * correct.item() / total
         print('Test correct: %d Accuracy: %.2f%%' % (correct, acc))
-        f = open(save_path + file_name ,'a')
-        f.write('Test correct: %d Accuracy: %.2f%%' % (correct, acc))
-        f.write('\n')
         test_scores.append(acc)
         if acc > max(test_scores):
             save_file = str(epoch) + '.pt'
@@ -133,9 +107,6 @@ def eval(epoch, if_test):
 
         acc = 100.0 * correct.item() / total
         print('Train correct: %d Accuracy: %.2f%%' % (correct, acc))
-        f = open(save_path + file_name ,'a')
-        f.write('Train correct: %d Accuracy: %.2f%%' % (correct, acc))
-        f.write('\n')
         train_scores.append(acc)
 
 def main():
@@ -148,10 +119,6 @@ def main():
         if (epoch + 1) % 20 == 0:
             print('Best Test Accuracy in %d: %.2f%%' % (epoch + 1, max(test_scores)))
             print('Best Train Accuracy in %d: %.2f%%' % (epoch + 1, max(train_scores)))
-            f = open(save_path + file_name ,'a')
-            f.write('Best Test Accuracy in %d: %.2f%%' % (epoch + 1, max(test_scores)))
-            f.write('Best Train Accuracy in %d: %.2f%%' % (epoch + 1, max(train_scores)))
-            f.write('\n')
 
 if __name__ == '__main__':
     main()
