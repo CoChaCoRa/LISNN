@@ -1,6 +1,13 @@
 # LISNN
 Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spiking Neural Networks with Lateral Interactions for Robust Object Recognition*](https://www.ijcai.org/Proceedings/2020/0211.pdf).
 
+## 日志
+
+### 2021_03_15
+- Validate the model on CIFAR-10 dataset.
+- With no changes to the code, Acc on train: 99%, Acc on test: 64% (overfitting)
+- 1)Add weight decay to Adamgrad; 2)Add CrossEntropy loss
+
 ## Citations
 
 If you find this repo helpful, please consider citing:
