@@ -8,6 +8,11 @@ Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spikin
 - With no changes to the code, Acc on train: 99%, Acc on test: 64% (overfitting)
 - 1)Add weight decay to Adamgrad; 2)Add CrossEntropy loss
 
+### 2021_03_16
+- Add an extra conv layer, and some modifications on params of original conv layer
+- Settings: Loss_function: MSE, Learning_rate: 0.001, Weight_decay: 0.00001
+- Best Test Accuracy in 100: 69.62%, Best Train Accuracy in 100: 75.39%
+
 ## Citations
 
 If you find this repo helpful, please consider citing:
