@@ -41,17 +41,20 @@ class LISNN(nn.Module):
             self.cnn = ((2, 64, 3, 1, 1, 5, 2), (64, 64, 3, 1, 1, 5, 2))
             self.kernel = (36, 18, 9)
         elif self.dts == 'CIFAR10':
-            self.cnn = ((3, 32, 3, 1, 1, 5, 2), (32, 32, 3, 1, 1, 5, 2))
-            self.kernel = (32, 16, 8)
+            self.cnn = ((3, 64, 3, 1, 1, 5, 2), (64, 32, 3, 1, 1, 5, 2),(32, 32, 3, 1, 1, 5, 2))
+            self.kernel = (32, 16, 8, 4)
 
         self.conv1 = nn.Conv2d(self.cnn[0][0], self.cnn[0][1], kernel_size = self.cnn[0][2], stride = self.cnn[0][3], padding = self.cnn[0][4], bias = if_bias)
         self.conv2 = nn.Conv2d(self.cnn[1][0], self.cnn[1][1], kernel_size = self.cnn[1][2], stride = self.cnn[1][3], padding = self.cnn[1][4], bias = if_bias)
+        self.conv3 = nn.Conv2d(self.cnn[2][0], self.cnn[2][1], kernel_size = self.cnn[2][2], stride = self.cnn[2][3], padding = self.cnn[2][4], bias = if_bias)
         self.fc1 = nn.Linear(self.kernel[-1] * self.kernel[-1] * self.cnn[-1][1], self.fc[0], bias = if_bias)
         self.fc2 = nn.Linear(self.fc[0], self.fc[1], bias = if_bias)
 
         if opt.if_lateral:
             self.lateral1 = nn.Conv2d(self.cnn[0][1], self.cnn[0][1], kernel_size = self.cnn[0][5], stride = self.cnn[0][3], padding = self.cnn[0][6], groups = self.cnn[0][1], bias = False)
             self.lateral2 = nn.Conv2d(self.cnn[1][1], self.cnn[1][1], kernel_size = self.cnn[1][5], stride = self.cnn[1][3], padding = self.cnn[1][6], groups = self.cnn[1][1], bias = False)
+        if self.dts == 'CIFAR10' and opt.if_lateral:
+            self.lateral3 = nn.Conv2d(self.cnn[2][1], self.cnn[2][1], kernel_size = self.cnn[2][5], stride = self.cnn[2][3], padding = self.cnn[2][6], groups = self.cnn[2][1], bias = False)
         else:
             self.lateral1 = None
             self.lateral2 = None
@@ -59,6 +62,8 @@ class LISNN(nn.Module):
     def forward(self, input, time_window = 20):
         c1_mem = c1_spike = torch.zeros(self.batch_size, self.cnn[0][1], self.kernel[0], self.kernel[0]).cuda()
         c2_mem = c2_spike = torch.zeros(self.batch_size, self.cnn[1][1], self.kernel[1], self.kernel[1]).cuda()
+        if self.dts == 'CIFAR10':
+            c3_mem = c3_spike = torch.zeros(self.batch_size, self.cnn[2][1], self.kernel[2], self.kernel[2]).cuda()
 
         h1_mem = h1_spike = h1_sumspike = torch.zeros(self.batch_size, self.fc[0]).cuda()
         h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, self.fc[1]).cuda()
@@ -73,9 +78,15 @@ class LISNN(nn.Module):
 
             x = F.avg_pool2d(c1_spike, 2)
 
-            c2_mem, c2_spike = mem_update(self.conv2, x, c2_mem,c2_spike, self.lateral2)
+            c2_mem, c2_spike = mem_update(self.conv2, x, c2_mem, c2_spike, self.lateral2)
 
             x = F.avg_pool2d(c2_spike, 2)
+            
+            if self.dts == 'CIFAR10':
+                c3_mem, c3_spike = mem_update(self.conv3, x, c3_mem, c3_spike, self.lateral3)
+
+                x = F.avg_pool2d(c3_spike, 2)
+            
             x = x.view(self.batch_size, -1)
 
             h1_mem, h1_spike = mem_update(self.fc1, x, h1_mem, h1_spike)
