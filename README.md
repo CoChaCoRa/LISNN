@@ -13,6 +13,9 @@ Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spikin
 - Settings: Loss_function: MSE, Learning_rate: 0.001, Weight_decay: 0.00001
 - Best Test Accuracy in 100: 69.62%, Best Train Accuracy in 100: 75.39%
 
+### 2021_03_16
+- Build a new conv structure based on VGG-16 (untrained)
+
 ## Citations
 
 If you find this repo helpful, please consider citing:
