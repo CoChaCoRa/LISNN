@@ -13,8 +13,12 @@ Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spikin
 - Settings: Loss_function: MSE, Learning_rate: 0.001, Weight_decay: 0.00001
 - Best Test Accuracy in 100: 69.62%, Best Train Accuracy in 100: 75.39%
 
-### 2021_03_16
+### 2021_03_17
 - Build a new conv structure based on VGG-16 (untrained)
+
+### 2021_03_19
+- Deep architecture may cause the gradient explosion
+- Paper [*Going Deeper in Spiking Neural Networks: VGG and Residual Architectures](https://arxiv.org/pdf/1802.02627.pdf) may have some solutions
 
 ## Citations
 
