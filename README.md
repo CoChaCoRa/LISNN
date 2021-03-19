@@ -18,7 +18,7 @@ Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spikin
 
 ### 2021_03_19
 - Deep architecture may cause the gradient explosion
-- Paper [*Going Deeper in Spiking Neural Networks: VGG and Residual Architectures](https://arxiv.org/pdf/1802.02627.pdf) may have some solutions
+- Paper [*Going Deeper in Spiking Neural Networks: VGG and Residual Architectures*](https://arxiv.org/pdf/1802.02627.pdf) may have some solutions
 
 ## Citations
 
