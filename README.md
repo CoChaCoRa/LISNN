@@ -20,6 +20,10 @@ Pytorch implementation of LISNN described in our paper [*LISNN: Improving Spikin
 - Deep architecture may cause the gradient explosion
 - Paper [*Going Deeper in Spiking Neural Networks: VGG and Residual Architectures*](https://arxiv.org/pdf/1802.02627.pdf) may have some solutions
 
+### 2021_03_22
+- Utilize batch normalization to solve the gradient explosion temporarily
+- TODO: test the VGG-SNN model with lateral interaction on noise-added dataset
+
 ## Citations
 
 If you find this repo helpful, please consider citing:
