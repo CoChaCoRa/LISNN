@@ -21,6 +21,7 @@ parser.add_argument('-dts', type = str, default = 'CIFAR10')
 parser.add_argument('-if_lateral', type = bool, default = True)
 parser.add_argument('-loss', type = str, default = 'MSE')
 parser.add_argument('-weight_decay', type = float, default = 0)
+parser.add_argument('-time_window',type = int, default = 20)
 
 opt = parser.parse_args()
 
@@ -31,14 +32,10 @@ torch.backends.cudnn.deterministic = True
 
 test_scores = []
 train_scores = []
-save_path = './' + 'LISNN_VGG' + '_' + opt.dts + '_' + str(opt.seed)
+save_path = './results/' + 'LISNN_VGG' + '_' + opt.dts + '_' + str(opt.seed)
 file_name = "/result" + '_' + time.strftime("%Y%m%d%H%M%S", time.localtime()) +'.txt'
 if not os.path.exists(save_path):
     os.mkdir(save_path)
-    
-f = open(save_path + file_name ,'a')
-f.write('Loss_function: %s, Learning_rate: %f, Weight_decay: %f' % (opt.loss, opt.learning_rate, opt.weight_decay))
-f.write('\n')
 
 
 if opt.dts == 'CIFAR10':
@@ -58,11 +55,10 @@ if opt.loss == 'MSE':
 elif opt.loss == 'CE':
     loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = opt.learning_rate, weight_decay = opt.weight_decay)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 50, gamma = 0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 80, gamma = 0.1)
 
 def train(epoch):
     model.train()
-    scheduler.step()
     start_time = time.time()
     total_loss = 0
     for i, (images, labels) in enumerate(train_loader):
@@ -82,13 +78,15 @@ def train(epoch):
         loss.backward()
         optimizer.step()
 
-        if (i + 1) % (len(train_dataset) // (opt.batch_size * 6)) == 0:
+        if (i + 1) % (len(train_dataset) // (opt.batch_size * 5)) == 0:
             print('Epoch: [%d/%d], Step: [%d/%d], Loss: %.4f, Time: %.2f' % (epoch + 1, opt.epoch, i + 1, len(train_dataset) // opt.batch_size, total_loss, time.time() - start_time))
             f = open(save_path + file_name ,'a')
             f.write('Epoch: [%d/%d], Step: [%d/%d], Loss: %.4f, Time: %.2f' % (epoch + 1, opt.epoch, i + 1, len(train_dataset) // opt.batch_size, total_loss, time.time() - start_time))
             f.write('\n')
             start_time = time.time()
             total_loss = 0
+            
+    scheduler.step()
 
 def eval(epoch, if_test):
     model.eval()
@@ -133,6 +131,12 @@ def eval(epoch, if_test):
         train_scores.append(acc)
 
 def main():
+    torch.cuda.empty_cache()
+    
+    f = open(save_path + file_name ,'a')
+    f.write('Loss_function: %s, Learning_rate: %f, Weight_decay: %f \n' % (opt.loss, opt.learning_rate, opt.weight_decay))
+    f.write('Time_window: %d\n' % (opt.time_window))
+    
     for epoch in range(opt.epoch):
         train(epoch)
         if (epoch + 1) % 2 == 0:
