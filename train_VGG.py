@@ -42,7 +42,7 @@ if opt.dts == 'CIFAR10':
     train_dataset = dsets.CIFAR10(root='./data', train=True, download=False, transform=transforms.ToTensor())
     test_dataset = dsets.CIFAR10(root='./data', train=False, download=False, transform=transforms.ToTensor())
 elif opt.dts == 'MNIST':
-    train_dataset = dsets.MNIST(root = './data/mnist/', train = True, transform = transforms.ToTensor(), download = True)
+    train_dataset = dsets.MNIST(root = './data/mnist/', train = True, transform = transforms.ToTensor(), download = False)
     test_dataset = dsets.MNIST(root = './data/mnist/', train = False, transform = transforms.ToTensor())
 
 train_loader = torch.utils.data.DataLoader(dataset = train_dataset, batch_size = opt.batch_size, shuffle = True)
@@ -55,7 +55,7 @@ if opt.loss == 'MSE':
 elif opt.loss == 'CE':
     loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = opt.learning_rate, weight_decay = opt.weight_decay)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 80, gamma = 0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 60, gamma = 0.1)
 
 def train(epoch):
     model.train()

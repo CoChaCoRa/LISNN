@@ -42,6 +42,7 @@ def vgg_conv_block(in_list, out_list, k_list, p_list, pooling_k, pooling_s):
 
 def vgg_fc_layer(size_in, size_out):
     layer = nn.Sequential(
+        nn.Dropout(),
         nn.Linear(size_in, size_out, bias = if_bias),
         nn.BatchNorm1d(size_out)
     )
