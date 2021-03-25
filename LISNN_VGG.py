@@ -56,8 +56,12 @@ class LISNN(nn.Module):
         self.time_window = opt.time_window
         self.fc = (512, 10)
 
-        if self.dts == 'CIFAR10' or self.dts == 'MNIST':
+        if self.dts == 'CIFAR10':
             self.cnn = ((3, 64, 3, 1, 2), (64, 128, 3, 1, 2),(128, 256, 3, 1, 2),(256, 512, 3, 1, 2),(512, 512, 3, 1, 2))
+            self.li = (5, 1, 2)
+            self.kernel = (32, 16, 8, 4, 2, 1)
+        elif self.dts == 'MNIST':
+            self.cnn = ((1, 64, 3, 1, 2), (64, 128, 3, 1, 2),(128, 256, 3, 1, 2),(256, 512, 3, 1, 2),(512, 512, 3, 1, 2))
             self.li = (5, 1, 2)
             self.kernel = (32, 16, 8, 4, 2, 1)
 
