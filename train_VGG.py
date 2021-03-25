@@ -41,6 +41,9 @@ if not os.path.exists(save_path):
 if opt.dts == 'CIFAR10':
     train_dataset = dsets.CIFAR10(root='./data', train=True, download=False, transform=transforms.ToTensor())
     test_dataset = dsets.CIFAR10(root='./data', train=False, download=False, transform=transforms.ToTensor())
+elif opt.dts == 'CIFAR100':
+    train_dataset = dsets.CIFAR100(root='./data', train=True, download=False, transform=transforms.ToTensor())
+    test_dataset = dsets.CIFAR100(root='./data', train=False, download=False, transform=transforms.ToTensor())
 elif opt.dts == 'MNIST':
     #train_dataset = dsets.MNIST(root = './data/mnist/', train = True, transform = transforms.ToTensor(), download = False)
     #test_dataset = dsets.MNIST(root = './data/mnist/', train = False, transform = transforms.ToTensor())

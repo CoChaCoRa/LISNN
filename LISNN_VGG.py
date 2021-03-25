@@ -54,9 +54,13 @@ class LISNN(nn.Module):
         self.batch_size = opt.batch_size
         self.dts = opt.dts
         self.time_window = opt.time_window
-        self.fc = (512, 10)
+        # self.fc = (512, 10)
+        if self.dts == 'CIFAR10' or self.dts == 'MNIST':
+            self.fc = (512, 10)
+        elif self.dts == 'CIFAR100':
+            self.fc = (512, 100)
 
-        if self.dts == 'CIFAR10':
+        if self.dts == 'CIFAR10' or self.dts == 'CIFAR100':
             self.cnn = ((3, 64, 3, 1, 2), (64, 128, 3, 1, 2),(128, 256, 3, 1, 2),(256, 512, 3, 1, 2),(512, 512, 3, 1, 2))
             self.li = (5, 1, 2)
             self.kernel = (32, 16, 8, 4, 2, 1)
@@ -101,7 +105,7 @@ class LISNN(nn.Module):
         h3_mem = h3_spike = h3_sumspike = torch.zeros(self.batch_size, self.fc[1]).cuda()
 
         for step in range(self.time_window):
-            if self.dts == 'CIFAR10' or self.dts == 'MNIST':
+            if self.dts == 'CIFAR10' or self.dts == 'CIFAR100' or self.dts == 'MNIST':
                 x = input > torch.rand(input.size()).cuda()
             elif self.dts == 'NMNIST':
                 x = input[:, :, :, :, step]
